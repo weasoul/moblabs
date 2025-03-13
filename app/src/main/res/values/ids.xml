@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="imageView3" type="id" />
+    <item name="ratingGroup3" type="id" />
+    <item name="rating3_1" type="id" />
+    <item name="rating3_2" type="id" />
+    <item name="rating3_3" type="id" />
+</resources>
