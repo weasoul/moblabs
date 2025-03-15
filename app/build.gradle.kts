@@ -37,6 +37,10 @@ android {
     buildFeatures {
         compose = true
     }
+    buildFeatures {
+        viewBinding = true
+    }
+
 }
 
 dependencies {
@@ -62,4 +66,10 @@ dependencies {
     implementation (libs.google.gson)
     implementation (libs.github.glide)
     annotationProcessor (libs.compiler)
+    implementation (libs.androidx.lifecycle.runtime.ktx.v287)
+    implementation (libs.androidx.lifecycle.viewmodel.ktx)
+    implementation (libs.androidx.lifecycle.livedata.ktx)
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.kotlinx.coroutines.android)
 }

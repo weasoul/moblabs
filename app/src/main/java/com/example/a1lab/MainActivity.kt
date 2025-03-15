@@ -1,51 +1,58 @@
 package com.example.a1lab
 
 import android.os.Bundle
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.a1lab.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var viewModel: AirQualityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        val ratingGroup1: RadioGroup = findViewById(R.id.ratingGroup1)
-        val ratingGroup2: RadioGroup = findViewById(R.id.ratingGroup2)
-        val ratingGroup3: RadioGroup = findViewById(R.id.ratingGroup3)
+        val repository = AirQualityRepository(AirQualityApi.RetrofitInstance.api)
+        val factory = AirQualityViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory).get(AirQualityViewModel::class.java)
 
-        ratingGroup1.setOnCheckedChangeListener { group, checkedId ->
-            showRating(1, checkedId)
+        val latitudeInput = findViewById<EditText>(R.id.latitudeInput)
+        val longitudeInput = findViewById<EditText>(R.id.longitudeInput)
+        val searchButton = findViewById<Button>(R.id.searchButton)
+        val resultText = findViewById<TextView>(R.id.resultText)
+
+        searchButton.setOnClickListener {
+            val lat = latitudeInput.text.toString().toDoubleOrNull()
+            val lon = longitudeInput.text.toString().toDoubleOrNull()
+
+            if (lat != null && lon != null) {
+                viewModel.fetchNearestSensor(lat, lon)
+            } else {
+                resultText.text = "Ошибка: Введите корректные координаты"
+            }
         }
 
-        ratingGroup2.setOnCheckedChangeListener { group, checkedId ->
-            showRating(2, checkedId)
+        viewModel.airQuality.observe(this, Observer { result ->
+            resultText.text = result
+        })
+        val customClock = findViewById<ClockView>(R.id.customClock)
+        val hourInput = findViewById<EditText>(R.id.hourInput)
+        val minuteInput = findViewById<EditText>(R.id.minuteInput)
+        val setTimeButton = findViewById<Button>(R.id.setTimeButton)
+
+        setTimeButton.setOnClickListener {
+            val hour = hourInput.text.toString().toIntOrNull() ?: 0
+            val minute = minuteInput.text.toString().toIntOrNull() ?: 0
+            customClock.setTime(hour, minute)
         }
-
-        ratingGroup3.setOnCheckedChangeListener { group, checkedId ->
-            showRating(3, checkedId)
-        }
-
-        val jsonString = assets.open("movies-2020s.json").bufferedReader().use { it.readText() }
-        val movieType = object : TypeToken<List<Movie>>() {}.type
-        val movies: List<Movie> = Gson().fromJson(jsonString, movieType)
-
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = MovieAdapter(movies)
     }
 
-    private fun showRating(cardNumber: Int, checkedId: Int) {
-        val radioButton: RadioButton = findViewById(checkedId)
-        val rating = radioButton.text.toString()
-        Toast.makeText(this, "Оценка $cardNumber: $rating", Toast.LENGTH_SHORT).show()
-    }
 }
+
+
+
